@@ -2,8 +2,8 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './photo';
+// import { TypeOrmModule } from '@nestjs/typeorm';
+// import { User } from './photo';
 import { GraphQLModule } from '@nestjs/graphql';
 import { AuthorsResolver } from './authors.resolver';
 
@@ -21,7 +21,6 @@ import { AuthorsResolver } from './authors.resolver';
     // TypeOrmModule.forFeature([User]),
     GraphQLModule.forRoot({
       autoSchemaFile: true,
-      playground: true,
     }),
     AuthorsResolver,
   ],

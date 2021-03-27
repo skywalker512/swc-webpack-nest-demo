@@ -3,16 +3,36 @@ const BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
   .BundleAnalyzerPlugin;
 const ESBuildMinimizerPlugin = require('@starfleet/esbuild-minimizer');
 
+const SUPPORTED_EXTENSIONS = [".js", ".json", ".node", ".mjs", ".ts", ".tsx"];
+
+const cjsDeps = () => ({
+  mainFields: ["main"],
+  extensions: SUPPORTED_EXTENSIONS,
+  exportsFields: ["exports"],
+  importsFields: ["imports"],
+  conditionNames: ["require", "node", "production"]
+});
+const esmDeps = () => ({
+  mainFields: ["main"],
+  extensions: SUPPORTED_EXTENSIONS,
+  exportsFields: ["exports"],
+  importsFields: ["imports"],
+  conditionNames: ["import", "node", "production"]
+});
+
+
 module.exports = {
   mode: 'none',
   amd: false,
+  devtool: "cheap-module-source-map",
   optimization: {
     nodeEnv: false,
     // minimize: false,
     minimize: true,
     minimizer: [
       new ESBuildMinimizerPlugin({
-        minifyIdentifiers: false,
+        minify: false,
+        minifyIdentifiers: true,
         minifyWhitespace: true,
         minifySyntax: false,
         keepNames: true,
@@ -31,7 +51,6 @@ module.exports = {
     '@apollo/gateway',
     'apollo-server-testing',
     'fsevents',
-    'graphql-tools'
   ],
   stats: {
     logging: 'error',
@@ -70,50 +89,50 @@ module.exports = {
           },
         ],
       },
-      // {
-      //   test: /.tsx?$/,
-      //   use: [
-      //     {
-      //       loader: 'ts-loader',
-      //       options: {
-      //         transpileOnly: true,
-      //         configFile: path.resolve(__dirname, 'tsconfig.build.json'),
-      //       },
-      //     },
-      //   ],
-      //   exclude: /node_modules/,
-      // },
       {
-        test: /\.tsx?$/,
-        exclude: /node_modules/,
+        test: /.tsx?$/,
         use: [
           {
-            loader: require.resolve('swc-loader'), // you would put swc-loader
+            loader: 'ts-loader',
             options: {
-              jsc: {
-                keepClassNames: true,
-                loose: true,
-                target: 'es2020',
-                parser: {
-                  syntax: 'typescript',
-                  decorators: true,
-                },
-                transform: {
-                  legacyDecorator: true,
-                  decoratorMetadata: true,
-                },
-              },
-              module: {
-                type: 'commonjs',
-                strict: false,
-                strictMode: true,
-                lazy: false,
-                noInterop: false,
-              },
+              transpileOnly: true,
+              configFile: path.resolve(__dirname, 'tsconfig.build.json'),
             },
           },
         ],
+        exclude: /node_modules/,
       },
+      // {
+      //   test: /\.tsx?$/,
+      //   exclude: /node_modules/,
+      //   use: [
+      //     {
+      //       loader: require.resolve('swc-loader'), // you would put swc-loader
+      //       options: {
+      //         jsc: {
+      //           keepClassNames: true,
+      //           loose: true,
+      //           target: 'es2020',
+      //           parser: {
+      //             syntax: 'typescript',
+      //             decorators: true,
+      //           },
+      //           transform: {
+      //             legacyDecorator: true,
+      //             decoratorMetadata: true,
+      //           },
+      //         },
+      //         module: {
+      //           type: 'commonjs',
+      //           strict: false,
+      //           strictMode: true,
+      //           lazy: false,
+      //           noInterop: false,
+      //         },
+      //       },
+      //     },
+      //   ],
+      // },
       {
         parser: { amd: false },
         exclude: /\.(node|json)$/,
@@ -126,6 +145,23 @@ module.exports = {
     ],
   },
   resolve: {
+    exportsFields: ["exports"],
+    importsFields: ["imports"],
+    byDependency: {
+      wasm: esmDeps(),
+      esm: esmDeps(),
+      url: { preferRelative: true },
+      worker: { ...esmDeps(), preferRelative: true },
+      commonjs: cjsDeps(),
+      amd: cjsDeps(),
+      // for backward-compat: loadModule
+      loader: cjsDeps(),
+      // for backward-compat: Custom Dependency
+      unknown: cjsDeps(),
+      // for backward-compat: getResolve without dependencyType
+      undefined: cjsDeps()
+    },
+    mainFields: ["main"],
     extensions: ['.tsx', '.ts', '.js', '.json'],
     plugins: [
       {
@@ -163,7 +199,7 @@ module.exports = {
     ],
   },
   plugins: [
-    new BundleAnalyzerPlugin(),
+    // new BundleAnalyzerPlugin(),
   ],
   cache: {
     type: 'filesystem',
