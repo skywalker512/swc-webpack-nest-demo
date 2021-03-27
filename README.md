@@ -3,7 +3,7 @@
 - 使用 swc 转义 ts
   - esbuild 不能处理 emitDecoratorMetadata
   - swc 比不进行 type 检查的 tsc 要快上几倍
-  - todo 等待 swc 转义之后类名的处理和 tsc 不用
+  - todo 等待 swc 修复发布[转义之后类名的处理和 tsc 不同](https://github.com/swc-project/swc/commit/dcdac2db6fbe9e1b78dc99dc1e29aa24c6a683f1)
 
 - 使用 esbuild 处理 minimize
   - swc 的 minimize 效果很差
